@@ -86,7 +86,7 @@ resource "aws_iam_role_policy_attachment" "munchy-lambda_logs" {
 }
 
 resource "aws_cloudwatch_event_rule" "munchy-cron" {
-  name                = "go-eat-cron"
+  name                = "munchy-cron"
   schedule_expression = "cron(0 11 ? * 1-5 *)"
 }
 
