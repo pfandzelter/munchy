@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"os"
 	"time"
@@ -21,9 +20,10 @@ var msgEng = "Today is the *" + time.Now().Format("01/02/2006") + "*, here is to
 
 // DBEntry is the entry in our DynamoDB table for a particular day.
 type DBEntry struct {
-	Canteen string     `json:"canteen"`
-	Date    string     `json:"date"`
-	Items   []FoodItem `json:"items"`
+	Canteen  string     `json:"canteen"`
+	SpecDiet bool       `json:"spec_diet"`
+	Date     string     `json:"date"`
+	Items    []FoodItem `json:"items"`
 }
 
 // FoodItem is one menu item.
@@ -69,14 +69,11 @@ func HandleRequest(ctx context.Context) {
 
 	defer resp.Body.Close()
 
-	data, err := ioutil.ReadAll(resp.Body)
+	_, err = ioutil.ReadAll(resp.Body)
 
 	if err != nil {
 		panic(err)
 	}
-
-	log.Printf("sending %s to %s, got %d: %s", msg, url, resp.StatusCode, string(data))
-
 }
 
 func main() {

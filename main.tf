@@ -25,7 +25,7 @@ resource "aws_lambda_function" "munchy" {
   role             = aws_iam_role.munchy-role.arn
   runtime          = "go1.x"
   memory_size      = 128
-  timeout          = 1
+  timeout          = 2
 
   environment {
     variables = {
@@ -80,9 +80,36 @@ resource "aws_iam_policy" "munchy-lambda_logging" {
 EOF
 }
 
+resource "aws_iam_policy" "munchy-dynamo" {
+  name = "munchy-dynamo"
+  path = "/"
+  description = "IAM policy for DynamoDB access from a lambda"
+
+  policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "Stmt1582485790003",
+      "Action": [
+        "dynamodb:Scan"
+      ],
+      "Effect": "Allow",
+      "Resource": "arn:aws:dynamodb:*:*:*"
+    }
+  ]
+}
+EOF
+}
+
 resource "aws_iam_role_policy_attachment" "munchy-lambda_logs" {
   role = aws_iam_role.munchy-role.name
   policy_arn = aws_iam_policy.munchy-lambda_logging.arn
+}
+
+resource "aws_iam_role_policy_attachment" "munchy-dynamo" {
+  role = aws_iam_role.munchy-role.name
+  policy_arn = aws_iam_policy.munchy-dynamo.arn
 }
 
 resource "aws_cloudwatch_event_rule" "munchy-cron" {

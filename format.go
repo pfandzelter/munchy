@@ -4,7 +4,7 @@ import "fmt"
 
 func fmtPrice(p int) string {
 	cents := p % 100
-	euros := int((p - cents)/100)
+	euros := int((p - cents) / 100)
 	return fmt.Sprintf("%d,%d", euros, cents)
 }
 
@@ -22,14 +22,14 @@ func getMessage(f []DBEntry, t string) string {
 		for _, item := range entry.Items {
 			foods += "\n"
 
-			if item.Vegan {
+			if !entry.SpecDiet {
+				foods += ":black_small_square:"
+			} else if item.Vegan {
 				foods += ":seedling:"
 			} else if item.Vegetarian {
 				foods += ":cheese_wedge:"
-			} else if entry.Canteen != "Kaiserstück" {
-				foods += ":cut_of_meat:"
 			} else {
-				foods += ":black_small_square:"
+				foods += ":cut_of_meat:"
 			}
 
 			foods += item.Name

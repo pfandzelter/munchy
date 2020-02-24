@@ -7,14 +7,13 @@ import (
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
 	"github.com/aws/aws-sdk-go/service/dynamodb/expression"
-	"os"
 	"time"
 )
 
 func getFood(region string, table string) ([]DBEntry, error) {
 	// Build the Dynamo client object
 	sess := session.Must(session.NewSession(&aws.Config{
-		Region:aws.String(region),
+		Region: aws.String(region),
 	}))
 
 	svc := dynamodb.New(sess)
@@ -25,10 +24,12 @@ func getFood(region string, table string) ([]DBEntry, error) {
 
 	filt := expression.Name("date").Equal(expression.Value(date))
 
-	expr, err := expression.NewBuilder().WithFilter(filt).Build()
+	proj := expression.NamesList(expression.Name("canteen"), expression.Name("date"), expression.Name("spec_diet"), expression.Name("items"))
+
+	expr, err := expression.NewBuilder().WithFilter(filt).WithProjection(proj).Build()
 
 	if err != nil {
-		return items, err
+		return nil, err
 	}
 
 	// Build the query input parameters
@@ -36,7 +37,8 @@ func getFood(region string, table string) ([]DBEntry, error) {
 		ExpressionAttributeNames:  expr.Names(),
 		ExpressionAttributeValues: expr.Values(),
 		FilterExpression:          expr.Filter(),
-		TableName:                 aws.String(os.Getenv("TABLE_NAME")),
+		ProjectionExpression:      expr.Projection(),
+		TableName:                 aws.String(table),
 	}
 
 	// Make the DynamoDB Query API call
@@ -44,7 +46,7 @@ func getFood(region string, table string) ([]DBEntry, error) {
 	fmt.Println("Result", result)
 
 	if err != nil {
-		return items, err
+		return nil, err
 	}
 
 	for _, i := range result.Items {
@@ -53,7 +55,7 @@ func getFood(region string, table string) ([]DBEntry, error) {
 		err = dynamodbattribute.UnmarshalMap(i, &item)
 
 		if err != nil {
-			return items, err
+			return nil, err
 		}
 
 		items = append(items, item)
