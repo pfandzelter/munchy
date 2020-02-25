@@ -33,6 +33,7 @@ type FoodItem struct {
 	ProfPrice  int    `json:"profprice"`
 	Vegan      bool   `json:"vgn"`
 	Vegetarian bool   `json:"vgt"`
+	Fish       bool   `json:"fish"`
 }
 
 // HandleRequest handles one request to the Lambda function.

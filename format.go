@@ -28,6 +28,8 @@ func getMessage(f []DBEntry, t string) string {
 				foods += ":seedling:"
 			} else if item.Vegetarian {
 				foods += ":cheese_wedge:"
+			} else if item.Fish {
+				foods += ":fish:"
 			} else {
 				foods += ":cut_of_meat:"
 			}
