@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"os"
 	"time"
@@ -70,11 +71,13 @@ func HandleRequest(ctx context.Context) {
 
 	defer resp.Body.Close()
 
-	_, err = ioutil.ReadAll(resp.Body)
+	data, err := ioutil.ReadAll(resp.Body)
 
 	if err != nil {
 		panic(err)
 	}
+
+	log.Printf("sending %s to %s, got ", msg, url, resp.StatusCode, string(data))
 }
 
 func main() {

@@ -1,11 +1,21 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
 func fmtPrice(p int) string {
 	cents := p % 100
 	euros := int((p - cents) / 100)
 	return fmt.Sprintf("%d,%d", euros, cents)
+}
+
+// you should never do this
+func escape(s string) string {
+	s = strings.ReplaceAll(s, `"`, `\"`)
+
+	return s
 }
 
 func getMessage(f []DBEntry, t string) string {
@@ -17,7 +27,7 @@ func getMessage(f []DBEntry, t string) string {
 			continue
 		}
 
-		foods += fmt.Sprintf(`,{"type": "section","text": {"type": "mrkdwn","text": "*%s*`, entry.Canteen)
+		foods += fmt.Sprintf(`,{"type": "section","text": {"type": "mrkdwn","text": "*%s*`, escape(entry.Canteen))
 
 		for _, item := range entry.Items {
 			foods += "\n"
@@ -34,7 +44,7 @@ func getMessage(f []DBEntry, t string) string {
 				foods += ":cut_of_meat:"
 			}
 
-			foods += item.Name
+			foods += escape(item.Name)
 			foods += " € "
 			foods += fmtPrice(item.StudPrice)
 

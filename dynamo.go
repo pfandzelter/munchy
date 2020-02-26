@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
@@ -43,7 +42,6 @@ func getFood(region string, table string) ([]DBEntry, error) {
 
 	// Make the DynamoDB Query API call
 	result, err := svc.Scan(params)
-	fmt.Println("Result", result)
 
 	if err != nil {
 		return nil, err
