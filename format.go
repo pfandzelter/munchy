@@ -18,7 +18,7 @@ func escape(s string) string {
 	return s
 }
 
-func getMessage(f []DBEntry, t string) string {
+func getMessage(f []DBEntry, long string, short string) string {
 
 	foods := ""
 
@@ -56,5 +56,5 @@ func getMessage(f []DBEntry, t string) string {
 		foods += `"}}`
 	}
 
-	return fmt.Sprintf(`{"blocks": [{"type": "section","text": {"type": "mrkdwn","text": "%s"}},{"type": "divider"}%s]}`, t, foods)
+	return fmt.Sprintf(`{"text":"%s", "blocks": [{"type": "section","text": {"type": "mrkdwn","text": "%s"}},{"type": "divider"}%s]}`, short, long, foods)
 }

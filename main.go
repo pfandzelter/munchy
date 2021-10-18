@@ -17,7 +17,9 @@ var awsRegion = os.Getenv("DYNAMODB_REGION")
 var awsTable = os.Getenv("DYNAMODB_TABLE")
 
 var msgDeu = "Heute ist der *" + time.Now().Format("02.01.2006") + "*, hier ist das Mittagsmenü für heute.\n*Guten Appetit!* :drooling_face:"
+var shortDeu = "Hier ist das Mittagsmenü für heute!"
 var msgEng = "Today is the *" + time.Now().Format("01/02/2006") + "*, here is today's lunch menu.\n*Enjoy!* :drooling_face:"
+var shortEng = "Here is today's lunch menu!"
 
 // DBEntry is the entry in our DynamoDB table for a particular day.
 type DBEntry struct {
@@ -48,9 +50,9 @@ func HandleRequest(ctx context.Context) {
 	msg := ""
 
 	if time.Now().Weekday().String() == "Wednesday" {
-		msg = getMessage(f, msgEng)
+		msg = getMessage(f, msgEng, shortEng)
 	} else {
-		msg = getMessage(f, msgDeu)
+		msg = getMessage(f, msgDeu, shortDeu)
 	}
 
 	jsonStr := []byte(msg)
