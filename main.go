@@ -7,8 +7,10 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
+	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
 )
 
@@ -40,7 +42,21 @@ type FoodItem struct {
 }
 
 // HandleRequest handles one request to the Lambda function.
-func HandleRequest(ctx context.Context) {
+func HandleRequest(ctx context.Context, event events.CloudWatchEvent) {
+
+	timezone := os.Getenv("MENSA_TIMEZONE")
+
+	tz, err := time.LoadLocation(timezone)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// see if this event was triggered by the DST eventbridge rule
+	if strings.Contains(event.Resources[0], "dst") != time.Now().In(tz).IsDST() {
+		return
+	}
+
 	f, err := getFood(awsRegion, awsTable)
 
 	if err != nil {

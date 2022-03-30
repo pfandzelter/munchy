@@ -1,19 +1,22 @@
-data "aws_region" "current" {}
+provider "aws" {
+  profile = var.aws_cli_profile
+  region  = var.aws_region
+}
 
 variable "project-name" {
-  type = string
+  type    = string
   default = "munchy"
 }
 
 variable "table-name" {
-  type = string
+  type        = string
   description = "Name of DynamoDB table where food items are stored."
-  default = "go-eat"
+  default     = "go-eat"
 }
 
 variable "webhookurl" {
   description = "Slack webhook url to post to."
-  type = string
+  type        = string
 }
 
 
@@ -29,9 +32,10 @@ resource "aws_lambda_function" "munchy" {
 
   environment {
     variables = {
-      WEBHOOK_URL = var.webhookurl,
-      DYNAMODB_TABLE = var.table-name,
-      DYNAMODB_REGION = data.aws_region.current.name
+      WEBHOOK_URL     = var.webhookurl,
+      DYNAMODB_TABLE  = var.table-name,
+      DYNAMODB_REGION = var.aws_region
+      MENSA_TIMEZONE  = var.mensa_timezone
     }
   }
 }
@@ -58,8 +62,8 @@ resource "aws_iam_role_policy_attachment" "munchy-basic-exec-role" {
 }
 
 resource "aws_iam_policy" "munchy-lambda_logging" {
-  name = "munchy-lambda_logging"
-  path = "/"
+  name        = "munchy-lambda_logging"
+  path        = "/"
   description = "IAM policy for logging from a lambda"
 
   policy = <<EOF
@@ -81,8 +85,8 @@ EOF
 }
 
 resource "aws_iam_policy" "munchy-dynamo" {
-  name = "munchy-dynamo"
-  path = "/"
+  name        = "munchy-dynamo"
+  path        = "/"
   description = "IAM policy for DynamoDB access from a lambda"
 
   policy = <<EOF
@@ -103,12 +107,12 @@ EOF
 }
 
 resource "aws_iam_role_policy_attachment" "munchy-lambda_logs" {
-  role = aws_iam_role.munchy-role.name
+  role       = aws_iam_role.munchy-role.name
   policy_arn = aws_iam_policy.munchy-lambda_logging.arn
 }
 
 resource "aws_iam_role_policy_attachment" "munchy-dynamo" {
-  role = aws_iam_role.munchy-role.name
+  role       = aws_iam_role.munchy-role.name
   policy_arn = aws_iam_policy.munchy-dynamo.arn
 }
 
@@ -117,9 +121,20 @@ resource "aws_cloudwatch_event_rule" "munchy-cron" {
   schedule_expression = "cron(0 11 ? * 2-6 *)"
 }
 
+resource "aws_cloudwatch_event_rule" "munchy-cron-dst" {
+  name                = "munchy-cron-dst"
+  schedule_expression = "cron(0 10 ? * 2-6 *)"
+}
+
 resource "aws_cloudwatch_event_target" "munchy-lambda" {
   target_id = "runLambda"
   rule      = aws_cloudwatch_event_rule.munchy-cron.name
+  arn       = aws_lambda_function.munchy.arn
+}
+
+resource "aws_cloudwatch_event_target" "munchy-lambda-dst" {
+  target_id = "runLambda"
+  rule      = aws_cloudwatch_event_rule.munchy-cron-dst.name
   arn       = aws_lambda_function.munchy.arn
 }
 
@@ -129,4 +144,12 @@ resource "aws_lambda_permission" "munchy-cloudwatch" {
   function_name = aws_lambda_function.munchy.arn
   principal     = "events.amazonaws.com"
   source_arn    = aws_cloudwatch_event_rule.munchy-cron.arn
+}
+
+resource "aws_lambda_permission" "munchy-cloudwatch-dst" {
+  statement_id  = "AllowExecutionFromCloudWatchDST"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.munchy.arn
+  principal     = "events.amazonaws.com"
+  source_arn    = aws_cloudwatch_event_rule.munchy-cron-dst.arn
 }
