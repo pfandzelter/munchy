@@ -33,7 +33,7 @@ func getMessage(f []DBEntry, long string, short string) string {
 			foods += "\n"
 
 			if !entry.SpecDiet {
-				foods += ":black_small_square:"
+				foods += "• "
 			} else if item.Vegan {
 				foods += ":seedling:"
 			} else if item.Vegetarian {
@@ -45,11 +45,18 @@ func getMessage(f []DBEntry, long string, short string) string {
 			}
 
 			foods += escape(item.Name)
-			foods += " € "
+
+			if item.Climate {
+				foods += " (:earth_africa:)"
+			}
+
+			foods += " "
+
 			foods += fmtPrice(item.StudPrice)
+			foods += "€"
 
 			if item.StudPrice != item.ProfPrice {
-				foods += "/" + fmtPrice(item.ProfPrice)
+				foods += "/" + fmtPrice(item.ProfPrice) + "€"
 			}
 
 		}

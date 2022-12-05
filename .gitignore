@@ -1,5 +1,7 @@
 .tfvars
 
+secret.auto.tfvars
+
 munchy
 munchy.zip
 

@@ -39,6 +39,7 @@ type FoodItem struct {
 	Vegan      bool   `json:"vgn"`
 	Vegetarian bool   `json:"vgt"`
 	Fish       bool   `json:"fish"`
+	Climate    bool   `json:"climate"`
 }
 
 // HandleRequest handles one request to the Lambda function.
@@ -95,7 +96,7 @@ func HandleRequest(ctx context.Context, event events.CloudWatchEvent) {
 		panic(err)
 	}
 
-	log.Printf("sending %s to %s, got ", msg, url, resp.StatusCode, string(data))
+	log.Printf("sending %s to %s, got %d: %s", msg, url, resp.StatusCode, string(data))
 }
 
 func main() {
