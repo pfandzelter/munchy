@@ -8,7 +8,7 @@ import (
 func fmtPrice(p int) string {
 	cents := p % 100
 	euros := int((p - cents) / 100)
-	return fmt.Sprintf("%d,%d", euros, cents)
+	return fmt.Sprintf("%d,%02d", euros, cents)
 }
 
 // you should never do this

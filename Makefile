@@ -16,7 +16,7 @@ munchy.zip: munchy
 	chmod +x munchy
 	zip -j $@ $<
 
-munchy: main.go
+munchy: main.go format.go dynamo.go
 	go get .
 	GOOS=linux GOARCH=amd64 go build -ldflags="-d -s -w" -o $@
 
