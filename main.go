@@ -18,9 +18,9 @@ var url = os.Getenv("WEBHOOK_URL")
 var awsRegion = os.Getenv("DYNAMODB_REGION")
 var awsTable = os.Getenv("DYNAMODB_TABLE")
 
-var msgDeu = "Heute ist der *" + time.Now().Format("02.01.2006") + "*, hier ist das Mittagsmenü für heute.\n*Guten Appetit!* :drooling_face:"
-var shortDeu = "Hier ist das Mittagsmenü für heute!"
-var msgEng = "Today is the *" + time.Now().Format("01/02/2006") + "*, here is today's lunch menu.\n*Enjoy!* :drooling_face:"
+// var msgDeu = "Heute ist" + time.Now().Weekday().String() + ", der *" + time.Now().Format("02.01.2006") + "*, hier ist das Mittagsmenü für heute.\n*Guten Appetit!* :drooling_face:"
+// var shortDeu = "Hier ist das Mittagsmenü für heute!"
+var msgEng = "Today is " + time.Now().Weekday().String() + ", the *" + time.Now().Format("01/02/2006") + "*, here is today's lunch menu.\n*Enjoy!* :drooling_face:"
 var shortEng = "Here is today's lunch menu!"
 
 // DBEntry is the entry in our DynamoDB table for a particular day.
@@ -66,11 +66,14 @@ func HandleRequest(ctx context.Context, event events.CloudWatchEvent) {
 
 	msg := ""
 
-	if time.Now().Weekday().String() == "Wednesday" {
-		msg = getMessage(f, msgEng, shortEng)
-	} else {
-		msg = getMessage(f, msgDeu, shortDeu)
-	}
+	// if time.Now().Weekday().String() == "Wednesday" {
+	// 	msg = getMessage(f, msgEng, shortEng)
+	// } else {
+	// 	msg = getMessage(f, msgDeu, shortDeu)
+	// }
+
+	// every day is English wednesday
+	msg = getMessage(f, msgEng, shortEng)
 
 	jsonStr := []byte(msg)
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonStr))
