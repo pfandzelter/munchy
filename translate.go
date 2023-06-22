@@ -10,6 +10,7 @@ import (
 )
 
 type translator struct {
+	deepLSourceLang string
 	deepLTargetLang string
 	deepLURL        string
 	deepLKey        string
@@ -17,7 +18,7 @@ type translator struct {
 
 func (t *translator) translate(name string) (string, error) {
 	reqBody := "text=" + url.QueryEscape(name)
-	reqBody += "&source_lang=" + "DE"
+	reqBody += "&source_lang=" + t.deepLSourceLang
 	reqBody += "&target_lang=" + t.deepLTargetLang
 
 	req, err := http.NewRequest("POST", t.deepLURL, bytes.NewBuffer([]byte(reqBody)))
@@ -53,9 +54,14 @@ func (t *translator) translate(name string) (string, error) {
 	return s.Translations[0].Text, nil
 }
 
-func translateFood(f []DBEntry, deepLTargetLang string, deepLURL string, deepLKey string) ([]DBEntry, error) {
+func translateFood(f []DBEntry, deepLSourceLang string, deepLTargetLang string, deepLURL string, deepLKey string) ([]DBEntry, error) {
+
+	if deepLSourceLang == deepLTargetLang {
+		return f, nil
+	}
 
 	t := &translator{
+		deepLSourceLang: deepLSourceLang,
 		deepLTargetLang: deepLTargetLang,
 		deepLURL:        deepLURL,
 		deepLKey:        deepLKey,

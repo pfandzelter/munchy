@@ -20,6 +20,7 @@ var awsTable = os.Getenv("DYNAMODB_TABLE")
 var deepLTargetLang = os.Getenv("DEEPL_TARGET_LANG")
 var deepLURL = os.Getenv("DEEPL_URL")
 var deepLKey = os.Getenv("DEEPL_KEY")
+var deepLSourceLang = "DE"
 
 var longMsg = "Today is " + time.Now().Weekday().String() + ", the *" + time.Now().Format("01/02/2006") + "*, here is today's lunch menu.\n*Enjoy!* :drooling_face:"
 var shortMsg = "Here is today's lunch menu!"
@@ -65,7 +66,7 @@ func HandleRequest(ctx context.Context, event events.CloudWatchEvent) {
 		panic(err)
 	}
 
-	f, err = translateFood(f, deepLTargetLang, deepLURL, deepLKey)
+	f, err = translateFood(f, deepLSourceLang, deepLTargetLang, deepLURL, deepLKey)
 
 	if err != nil {
 		panic(err)
