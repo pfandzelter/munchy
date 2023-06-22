@@ -3,23 +3,6 @@ provider "aws" {
   region  = var.aws_region
 }
 
-variable "project-name" {
-  type    = string
-  default = "munchy"
-}
-
-variable "table-name" {
-  type        = string
-  description = "Name of DynamoDB table where food items are stored."
-  default     = "go-eat"
-}
-
-variable "webhookurl" {
-  description = "Slack webhook url to post to."
-  type        = string
-}
-
-
 resource "aws_lambda_function" "munchy" {
   function_name    = "munchy"
   filename         = "munchy.zip"
@@ -27,21 +10,24 @@ resource "aws_lambda_function" "munchy" {
   source_code_hash = filebase64sha256("munchy.zip")
   role             = aws_iam_role.munchy-role.arn
   runtime          = "go1.x"
-  memory_size      = 128
-  timeout          = 2
+  memory_size      = var.lambda_memory_size
+  timeout          = var.lambda_timeout
 
   environment {
     variables = {
-      WEBHOOK_URL     = var.webhookurl,
-      DYNAMODB_TABLE  = var.table-name,
-      DYNAMODB_REGION = var.aws_region
-      MENSA_TIMEZONE  = var.mensa_timezone
+      WEBHOOK_URL       = var.webhookurl,
+      DYNAMODB_TABLE    = var.table_name,
+      DYNAMODB_REGION   = var.aws_region,
+      MENSA_TIMEZONE    = var.mensa_timezone,
+      DEEPL_TARGET_LANG = var.deepl_target_lang,
+      DEEPL_URL         = var.deepl_url,
+      DEEPL_KEY         = var.deepl_key,
     }
   }
 }
 
 resource "aws_iam_role" "munchy-role" {
-  name               = var.project-name
+  name               = var.project_name
   assume_role_policy = <<POLICY
 {
   "Version": "2012-10-17",
