@@ -14,14 +14,15 @@ import (
 	"github.com/aws/aws-lambda-go/lambda"
 )
 
-var url = os.Getenv("WEBHOOK_URL")
+var webhookURL = os.Getenv("WEBHOOK_URL")
 var awsRegion = os.Getenv("DYNAMODB_REGION")
 var awsTable = os.Getenv("DYNAMODB_TABLE")
+var deepLTargetLang = os.Getenv("DEEPL_TARGET_LANG")
+var deepLURL = os.Getenv("DEEPL_URL")
+var deepLKey = os.Getenv("DEEPL_KEY")
 
-// var msgDeu = "Heute ist" + time.Now().Weekday().String() + ", der *" + time.Now().Format("02.01.2006") + "*, hier ist das Mittagsmenü für heute.\n*Guten Appetit!* :drooling_face:"
-// var shortDeu = "Hier ist das Mittagsmenü für heute!"
-var msgEng = "Today is " + time.Now().Weekday().String() + ", the *" + time.Now().Format("01/02/2006") + "*, here is today's lunch menu.\n*Enjoy!* :drooling_face:"
-var shortEng = "Here is today's lunch menu!"
+var longMsg = "Today is " + time.Now().Weekday().String() + ", the *" + time.Now().Format("01/02/2006") + "*, here is today's lunch menu.\n*Enjoy!* :drooling_face:"
+var shortMsg = "Here is today's lunch menu!"
 
 // DBEntry is the entry in our DynamoDB table for a particular day.
 type DBEntry struct {
@@ -64,19 +65,19 @@ func HandleRequest(ctx context.Context, event events.CloudWatchEvent) {
 		panic(err)
 	}
 
+	f, err = translateFood(f, deepLTargetLang, deepLURL, deepLKey)
+
+	if err != nil {
+		panic(err)
+	}
+
 	msg := ""
 
-	// if time.Now().Weekday().String() == "Wednesday" {
-	// 	msg = getMessage(f, msgEng, shortEng)
-	// } else {
-	// 	msg = getMessage(f, msgDeu, shortDeu)
-	// }
-
 	// every day is English wednesday
-	msg = getMessage(f, msgEng, shortEng)
+	msg = getMessage(f, longMsg, shortMsg)
 
 	jsonStr := []byte(msg)
-	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonStr))
+	req, err := http.NewRequest("POST", webhookURL, bytes.NewBuffer(jsonStr))
 
 	if err != nil {
 		panic(err)
@@ -99,7 +100,7 @@ func HandleRequest(ctx context.Context, event events.CloudWatchEvent) {
 		panic(err)
 	}
 
-	log.Printf("sending %s to %s, got %d: %s", msg, url, resp.StatusCode, string(data))
+	log.Printf("sending %s to %s, got %d: %s", msg, webhookURL, resp.StatusCode, string(data))
 }
 
 func main() {
